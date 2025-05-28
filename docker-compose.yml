@@ -29,8 +29,8 @@ services:
     command: >
       bash -c "
         until pg_isready -h postgres-primary -p 5432; do sleep 1; done &&
-        pg_basebackup -h postgres-primary -D /var/lib/postgresql/data -U ${POSTGRES_USER} -Fp -Xs -P -R &&
-        echo \"primary_conninfo = 'host=postgres-primary port=5432 user=${POSTGRES_USER} password=${POSTGRES_PASSWORD}'\" >> /var/lib/postgresql/data/postgresql.auto.conf &&
+        PGPASSWORD=${REPL_PASSWORD} pg_basebackup -h postgres-primary -D /var/lib/postgresql/data -U ${REPL_USER} -Fp -Xs -P -R &&
+        echo \"primary_conninfo = 'host=postgres-primary port=5432 user=${REPL_USER} password=${REPL_PASSWORD}'\" >> /var/lib/postgresql/data/postgresql.auto.conf &&
         postgres
       "
     networks:
@@ -49,10 +49,10 @@ services:
     command: >
       bash -c "
         until pg_isready -h postgres-primary -p 5432; do sleep 1; done &&
-        pg_basebackup -h postgres-primary -D /var/lib/postgresql/data -U ${POSTGRES_USER} -Fp -Xs -P -R &&
-        echo \"primary_conninfo = 'host=postgres-primary port=5432 user=${POSTGRES_USER} password=${POSTGRES_PASSWORD}'\" >> /var/lib/postgresql/data/postgresql.auto.conf &&
+        PGPASSWORD=${REPL_PASSWORD} pg_basebackup -h postgres-primary -D /var/lib/postgresql/data -U ${REPL_USER} -Fp -Xs -P -R &&
+        echo \"primary_conninfo = 'host=postgres-primary port=5432 user=${REPL_USER} password=${REPL_PASSWORD}'\" >> /var/lib/postgresql/data/postgresql.auto.conf &&
         postgres
-      "
+      " 
     networks:
       - pgnet
 
