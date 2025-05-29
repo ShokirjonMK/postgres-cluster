@@ -13,6 +13,7 @@ services:
       - "5432:5432"
     volumes:
       - ./primary/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - primary_data:/var/lib/postgresql/data
     networks:
       - pgnet
 
@@ -29,10 +30,13 @@ services:
     command: >
       bash -c "
         until pg_isready -h postgres-primary -p 5432; do sleep 1; done &&
+        rm -rf /var/lib/postgresql/data/* &&
         PGPASSWORD=${REPL_PASSWORD} pg_basebackup -h postgres-primary -D /var/lib/postgresql/data -U ${REPL_USER} -Fp -Xs -P -R &&
         echo \"primary_conninfo = 'host=postgres-primary port=5432 user=${REPL_USER} password=${REPL_PASSWORD}'\" >> /var/lib/postgresql/data/postgresql.auto.conf &&
         postgres
       "
+    volumes:
+      - replica1_data:/var/lib/postgresql/data
     networks:
       - pgnet
 
@@ -49,13 +53,21 @@ services:
     command: >
       bash -c "
         until pg_isready -h postgres-primary -p 5432; do sleep 1; done &&
+        rm -rf /var/lib/postgresql/data/* &&
         PGPASSWORD=${REPL_PASSWORD} pg_basebackup -h postgres-primary -D /var/lib/postgresql/data -U ${REPL_USER} -Fp -Xs -P -R &&
         echo \"primary_conninfo = 'host=postgres-primary port=5432 user=${REPL_USER} password=${REPL_PASSWORD}'\" >> /var/lib/postgresql/data/postgresql.auto.conf &&
         postgres
-      " 
+      "
+    volumes:
+      - replica2_data:/var/lib/postgresql/data
     networks:
       - pgnet
 
 networks:
   pgnet:
     driver: bridge
+
+volumes:
+  primary_data:
+  replica1_data:
+  replica2_data:
